@@ -1,73 +1,104 @@
-# Welcome to your Lovable project
+# EquipX - Medical Equipment Marketplace
 
-## Project info
+A modern React-based marketplace for second-hand medical equipment that connects healthcare providers to redistribute unused and gently used equipment, reducing waste while improving healthcare accessibility.
 
-**URL**: https://lovable.dev/projects/a985493b-4fef-4637-9df6-bce5759306c4
+## 🏥 Features
 
-## How can I edit this code?
+### Two User Types
+- **Sellers (Donors)**: Healthcare providers who can list medical equipment
+- **Buyers (Receivers)**: Healthcare facilities looking for equipment
 
-There are several ways of editing your application.
+### Core Functionality
+- **User Registration & Authentication**: Role-based registration system
+- **Equipment Listing Management**: Add, edit, and manage equipment listings
+- **Advanced Search & Filtering**: Search by name, filter by condition, sort by price
+- **Real-time Chat**: Direct communication between buyers and sellers
+- **Responsive Design**: Mobile-first design using Tailwind CSS
+- **Professional UI**: Medical-themed design with trust-building elements
 
-**Use Lovable**
+### Equipment Management
+- Detailed equipment information (name, image, condition, price)
+- Condition tracking (Unused, Used, Partially Used)
+- Seller dashboard with statistics and listing management
+- Equipment status management (Active, Sold, Archived)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a985493b-4fef-4637-9df6-bce5759306c4) and start prompting.
+## 🚀 Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+1. **Registration**: Choose your role (Donor/Seller or Receiver/Buyer)
+2. **For Sellers**: Access your dashboard to add and manage equipment listings
+3. **For Buyers**: Browse available equipment and contact sellers directly
+4. **Communication**: Use the built-in chat system to negotiate and coordinate
 
-**Use your preferred IDE**
+## 🎨 Design System
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Medical Color Palette**: Professional blues (#0EA5E9) and greens (#10B981)
+- **Clean Typography**: Modern, accessible fonts
+- **Medical Equipment Icons**: Healthcare-specific iconography
+- **Trust Elements**: Professional medical aesthetic
+- **Responsive Cards**: Mobile-optimized equipment display
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🛠️ Technology Stack
 
-Follow these steps:
+- **Frontend**: React 18 with TypeScript
+- **Styling**: Tailwind CSS with custom design system
+- **UI Components**: shadcn/ui component library
+- **State Management**: React hooks for local state
+- **Icons**: Lucide React icon library
+- **Build Tool**: Vite for fast development
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🏗️ Architecture
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Components
+- `EquipmentCard`: Reusable equipment display component
+- `ChatWindow`: Real-time chat interface
+- `EquipmentForm`: Add/edit equipment modal
+- `Landing`: Authentication and role selection
+- `SellerDashboard`: Equipment management interface
+- `UserView`: Equipment browsing interface
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Design System
+- Custom CSS variables in `src/index.css`
+- Tailwind configuration in `tailwind.config.ts`
+- Medical-themed color palette and gradients
+- Professional shadows and animations
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## 🎯 Key User Flows
 
-**Edit a file directly in GitHub**
+### Seller Journey
+1. Register as a Donor
+2. Access seller dashboard
+3. Add equipment listings with details
+4. Manage active listings
+5. Communicate with interested buyers
+6. Mark items as sold
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Buyer Journey
+1. Register as a Receiver
+2. Browse equipment marketplace
+3. Use search and filters to find equipment
+4. Contact sellers through chat
+5. Negotiate and coordinate purchase
 
-**Use GitHub Codespaces**
+## 🔄 Future Enhancements
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+This is a fully functional prototype. To add backend functionality:
 
-## What technologies are used for this project?
+- **Database Integration**: Connect to Supabase for data persistence
+- **Real Authentication**: Implement secure user authentication
+- **Live Chat**: Real-time messaging with WebSocket support
+- **Payment Integration**: Secure transaction processing
+- **Image Upload**: Equipment photo upload functionality
+- **Advanced Analytics**: Dashboard metrics and insights
 
-This project is built with:
+## 💡 Development Notes
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- Built with mobile-first responsive design
+- Uses semantic HTML for accessibility
+- Implements SEO best practices
+- Professional medical equipment imagery
+- Clean, maintainable React component architecture
+- Type-safe TypeScript implementation
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/a985493b-4fef-4637-9df6-bce5759306c4) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+**EquipX** - Extending the life of medical equipment through sustainable redistribution.
