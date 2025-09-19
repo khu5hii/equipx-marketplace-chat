@@ -8,12 +8,13 @@ export interface User {
     token?: string;
 }
 
-export interface ChatMessage {
-    _id?: string;
-    senderId: string;
-    receiverId: string;
-    message: string;
-    timestamp: string;
+export interface Message {
+  _id?: string;
+  senderId: string;
+  sender: string;
+  message: string;
+  timestamp: string;
+  equipmentId: string;
 }
 
 export interface Equipment {
@@ -24,4 +25,5 @@ export interface Equipment {
     price: number;
     seller: string;
     sellerId: string;
+    saleStatus?: "active" | "sold" | "archived";
 }

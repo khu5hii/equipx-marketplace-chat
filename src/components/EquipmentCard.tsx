@@ -59,14 +59,23 @@ export const EquipmentCard = ({
           )}
           
           {showActions === "seller" && (
-            <Button 
-              onClick={() => onEdit?.(equipment)}
-              variant="outline"
-              className="w-full transition-smooth hover:bg-accent"
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Listing
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => onContact?.(equipment)}
+                className="w-full gradient-medical text-primary-foreground shadow-button transition-bounce hover:scale-105"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Contact Buyer
+              </Button>
+              <Button 
+                onClick={() => onEdit?.(equipment)}
+                variant="outline"
+                className="w-full transition-smooth hover:bg-accent"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Listing
+              </Button>
+            </div>
           )}
         </div>
       </CardContent>

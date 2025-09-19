@@ -6,7 +6,7 @@ import { Plus, Activity, Package, CheckCircle, LogOut } from "lucide-react";
 import { EquipmentCard } from "@/components/EquipmentCard";
 import { EquipmentForm } from "@/components/EquipmentForm";
 import { ChatWindow } from "@/components/ChatWindow";
-import { createProduct, updateProduct, deleteProduct, fetchProductsBySeller } from "@/services/product.service";
+import { createProduct, updateProduct, deleteProduct, fetchProductsBySeller, markAsSold, markAsArchived } from "@/services/product.service";
 import { Equipment, User } from "@/models/models";
 import { useNavigate } from "react-router-dom";
 
@@ -19,7 +19,7 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
-  const [chatEquipment, setChatEquipment] = useState<Equipment | null>(null);
+  const [chatEquipment, setChatEquipment] = useState<Equipment | null>(null); // State for ChatWindow
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,9 +47,9 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
   const handleEditEquipment = async (updatedEquipment: Omit<Equipment, "_id" | "seller" | "sellerId">) => {
     if (!editingEquipment) return;
     try {
-        const updated = await updateProduct(editingEquipment._id, updatedEquipment);
-        setEquipment(prev => prev.map(item => (item._id === editingEquipment._id ? updated : item)));
-        setEditingEquipment(null); // Close the form after successful update
+      const updated = await updateProduct(editingEquipment._id, updatedEquipment);
+      setEquipment(prev => prev.map(item => (item._id === editingEquipment._id ? updated : item)));
+      setEditingEquipment(null); // Close the form after successful update
     } catch (error) {
       console.error("Failed to update equipment:", error);
     }
@@ -57,11 +57,25 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
 
   const handleMarkSold = async (equipmentId: string) => {
     try {
-      await deleteProduct(equipmentId);
+      await markAsSold(equipmentId);
       setEquipment(prev => prev.filter(item => item._id !== equipmentId));
     } catch (error) {
       console.error("Failed to mark equipment as sold:", error);
     }
+  };
+
+  const handleMarkArchived = async (equipmentId: string) => {
+    try {
+        await markAsArchived(equipmentId);
+        setEquipment(prev => prev.filter(item => item._id !== equipmentId));
+    } catch (error) {
+        console.error("Failed to mark equipment as archived:", error);
+    }
+};
+
+  const handleOpenChat = (equipment: Equipment) => {
+    console.log("Opening chat for equipment:", equipment); // Debugging log
+    setChatEquipment(equipment); // Set the equipment for the chat window
   };
 
   const handleLogout = () => {
@@ -69,7 +83,9 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
     navigate("/login", { replace: true }); // Redirect to login page
   };
 
-  const activeListings = equipment.filter(item => item.sellerId === user._id); // Fix filtering logic
+  const activeListings = equipment.filter(item => item.saleStatus === 'active');
+  const soldListings = equipment.filter(item => item.saleStatus === 'sold');
+  const archivedListings = equipment.filter(item => item.saleStatus === 'archived');
   const totalValue = activeListings.reduce((sum, item) => sum + item.price, 0);
 
   return (
@@ -135,7 +151,7 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Items Redistributed</p>
-                  <p className="text-3xl font-bold text-foreground">12</p>
+                  <p className="text-3xl font-bold text-foreground">{soldListings.length + archivedListings.length}</p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-secondary" />
               </div>
@@ -162,8 +178,8 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
             <Tabs defaultValue="active" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="active">Active ({activeListings.length})</TabsTrigger>
-                <TabsTrigger value="sold">Sold (3)</TabsTrigger>
-                <TabsTrigger value="archived">Archived (2)</TabsTrigger>
+                <TabsTrigger value="sold">Sold ({soldListings.length})</TabsTrigger>
+                <TabsTrigger value="archived">Archived ({archivedListings.length})</TabsTrigger>
               </TabsList>
               
               <TabsContent value="active" className="mt-6">
@@ -171,10 +187,11 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {activeListings.map((item) => (
                       <div key={item._id} className="space-y-2">
-                        <EquipmentCard 
+                        <EquipmentCard
                           equipment={item}
                           showActions="seller"
                           onEdit={(equipment) => setEditingEquipment(equipment)}
+                          onContact={() => handleOpenChat(item)} // Pass handleOpenChat to onContact
                         />
                         <Button
                           variant="outline" 
@@ -208,17 +225,43 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
               </TabsContent>
               
               <TabsContent value="sold" className="mt-6">
-                <div className="text-center py-12">
-                  <CheckCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Sold equipment history will appear here</p>
-                </div>
+                {soldListings.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {soldListings.map((item) => (
+                      <div key={item._id} className="space-y-2">
+                        <EquipmentCard equipment={item} showActions="seller" />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleMarkArchived(item._id)}
+                          className="w-full text-secondary border-secondary hover:bg-secondary hover:text-secondary-foreground transition-smooth"
+                        >
+                          Archive
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <CheckCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No sold equipment</p>
+                  </div>
+                )}
               </TabsContent>
               
               <TabsContent value="archived" className="mt-6">
-                <div className="text-center py-12">
-                  <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Archived listings will appear here</p>
-                </div>
+                {archivedListings.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {archivedListings.map((item) => (
+                      <EquipmentCard key={item._id} equipment={item} showActions="seller" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No archived equipment</p>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -248,6 +291,7 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
           equipment={chatEquipment}
           onClose={() => setChatEquipment(null)}
           currentUser={user.name}
+          currentUserId={user._id} // Ensure currentUserId is the seller's ID
         />
       )}
     </div>

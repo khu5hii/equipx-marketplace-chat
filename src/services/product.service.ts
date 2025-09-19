@@ -56,12 +56,33 @@ export const updateProduct = async (productId: string, updateData: Partial<Equip
         throw error;
     }
 };
+
+export const markAsSold = async (productId: string): Promise<Equipment> => {
+    try {
+        const response = await axios.put(`${API_URL}/${productId}/mark-as-sold`, {}, { headers: getAuthHeader() });
+        return response.data as Equipment;
+    } catch (error) {
+        console.error('Error marking product as sold:', error);
+        throw error;
+    }
+};
+
 export const deleteProduct = async (productId) => {
     try {
         const response = await axios.delete(`${API_URL}/${productId}`, { headers: getAuthHeader() });
         return response.data;
     } catch (error) {
         console.error('Error deleting product:', error);
+        throw error;
+    }
+};
+
+export const markAsArchived = async (productId: string): Promise<Equipment> => {
+    try {
+        const response = await axios.put(`${API_URL}/${productId}/mark-as-archived`, {}, { headers: getAuthHeader() });
+        return response.data as Equipment;
+    } catch (error) {
+        console.error('Error marking product as archived:', error);
         throw error;
     }
 };

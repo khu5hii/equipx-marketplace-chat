@@ -291,6 +291,7 @@ export const UserView = ({ user, onLogout }: UserViewProps) => {
           equipment={chatEquipment}
           onClose={() => setChatEquipment(null)}
           currentUser={user.name}
+          currentUserId={user._id}
         />
       )}
     </div>
