@@ -2,16 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Edit } from "lucide-react";
-
-export interface Equipment {
-  id: string;
-  name: string;
-  image: string;
-  status: "unused" | "used" | "partial";
-  price: number;
-  seller: string;
-  sellerId: string;
-}
+import { Equipment } from "@/models/models";
 
 interface EquipmentCardProps {
   equipment: Equipment;

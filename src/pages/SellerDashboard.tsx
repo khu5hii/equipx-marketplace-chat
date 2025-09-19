@@ -1,80 +1,75 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Activity, Package, CheckCircle, LogOut } from "lucide-react";
-import { EquipmentCard, Equipment } from "@/components/EquipmentCard";
+import { EquipmentCard } from "@/components/EquipmentCard";
 import { EquipmentForm } from "@/components/EquipmentForm";
 import { ChatWindow } from "@/components/ChatWindow";
-import bloodPressureImg from "@/assets/blood-pressure-monitor.jpg";
-import pulseOximeterImg from "@/assets/pulse-oximeter.jpg";
-
-interface User {
-  name: string;
-  email: string;
-  role: "seller" | "buyer";
-}
+import { createProduct, updateProduct, deleteProduct, fetchProductsBySeller } from "@/services/product.service";
+import { Equipment, User } from "@/models/models";
+import { useNavigate } from "react-router-dom";
 
 interface SellerDashboardProps {
   user: User;
   onLogout: () => void;
 }
 
-// Mock data for demo with generated images
-const initialEquipment: Equipment[] = [
-  {
-    id: "1",
-    name: "Digital Blood Pressure Monitor",
-    image: bloodPressureImg,
-    status: "unused",
-    price: 250,
-    seller: "Dr. Sarah Johnson",
-    sellerId: "seller1",
-  },
-  {
-    id: "2", 
-    name: "Pulse Oximeter",
-    image: pulseOximeterImg,
-    status: "used",
-    price: 85,
-    seller: "Dr. Sarah Johnson", 
-    sellerId: "seller1",
-  },
-];
-
 export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
-  const [equipment, setEquipment] = useState<Equipment[]>(initialEquipment);
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
   const [chatEquipment, setChatEquipment] = useState<Equipment | null>(null);
+  const navigate = useNavigate();
 
-  const handleAddEquipment = (newEquipment: Omit<Equipment, "id" | "seller" | "sellerId">) => {
-    const equipment: Equipment = {
-      ...newEquipment,
-      id: Date.now().toString(),
-      seller: user.name,
-      sellerId: "seller1",
+  useEffect(() => {
+    const loadEquipment = async () => {
+      try {
+        const products = await fetchProductsBySeller(user._id);
+        setEquipment(products); // Ensure state is updated with fetched products
+      } catch (error) {
+        console.error("Failed to fetch equipment:", error);
+      }
     };
-    setEquipment(prev => [equipment, ...prev]);
-    setShowForm(false);
+    loadEquipment();
+  }, [user._id]);
+
+  const handleAddEquipment = async (newEquipment: Omit<Equipment, "_id" | "seller" | "sellerId">) => {
+    try {
+      const createdEquipment = await createProduct({ ...newEquipment, seller: user.name, sellerId: user._id });
+      setEquipment(prev => [createdEquipment, ...prev]);
+      setShowForm(false);
+    } catch (error) {
+      console.error("Failed to add equipment:", error);
+    }
   };
 
-  const handleEditEquipment = (updatedEquipment: Omit<Equipment, "id" | "seller" | "sellerId">) => {
+  const handleEditEquipment = async (updatedEquipment: Omit<Equipment, "_id" | "seller" | "sellerId">) => {
     if (!editingEquipment) return;
-    
-    setEquipment(prev => prev.map(item => 
-      item.id === editingEquipment.id 
-        ? { ...item, ...updatedEquipment }
-        : item
-    ));
-    setEditingEquipment(null);
+    try {
+        const updated = await updateProduct(editingEquipment._id, updatedEquipment);
+        setEquipment(prev => prev.map(item => (item._id === editingEquipment._id ? updated : item)));
+        setEditingEquipment(null); // Close the form after successful update
+    } catch (error) {
+      console.error("Failed to update equipment:", error);
+    }
   };
 
-  const handleMarkSold = (equipmentId: string) => {
-    setEquipment(prev => prev.filter(item => item.id !== equipmentId));
+  const handleMarkSold = async (equipmentId: string) => {
+    try {
+      await deleteProduct(equipmentId);
+      setEquipment(prev => prev.filter(item => item._id !== equipmentId));
+    } catch (error) {
+      console.error("Failed to mark equipment as sold:", error);
+    }
   };
 
-  const activeListings = equipment.filter(item => item.sellerId === "seller1");
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Clear the token
+    navigate("/login", { replace: true }); // Redirect to login page
+  };
+
+  const activeListings = equipment.filter(item => item.sellerId === user._id); // Fix filtering logic
   const totalValue = activeListings.reduce((sum, item) => sum + item.price, 0);
 
   return (
@@ -97,7 +92,7 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
               </div>
               <Button 
                 variant="outline" 
-                onClick={onLogout}
+                onClick={handleLogout}
                 className="transition-smooth hover:bg-accent"
               >
                 <LogOut className="w-4 h-4 mr-2" />
@@ -175,7 +170,7 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
                 {activeListings.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {activeListings.map((item) => (
-                      <div key={item.id} className="space-y-2">
+                      <div key={item._id} className="space-y-2">
                         <EquipmentCard 
                           equipment={item}
                           showActions="seller"
@@ -184,7 +179,7 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
                         <Button
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleMarkSold(item.id)}
+                          onClick={() => handleMarkSold(item._id)}
                           className="w-full text-secondary border-secondary hover:bg-secondary hover:text-secondary-foreground transition-smooth"
                         >
                           Mark as Sold

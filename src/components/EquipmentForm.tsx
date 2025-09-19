@@ -5,11 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from "lucide-react";
-import { Equipment } from "./EquipmentCard";
+import { Equipment } from "@/models/models";
 
 interface EquipmentFormProps {
   equipment?: Equipment;
-  onSave: (equipment: Omit<Equipment, "id" | "seller" | "sellerId">) => void;
+  onSave: (equipment: Omit<Equipment, "_id" | "seller" | "sellerId">) => void;
   onCancel: () => void;
 }
 
@@ -17,13 +17,13 @@ export const EquipmentForm = ({ equipment, onSave, onCancel }: EquipmentFormProp
   const [formData, setFormData] = useState({
     name: equipment?.name || "",
     image: equipment?.image || "",
-    status: equipment?.status || "unused" as const,
+    status: (equipment?.status as "unused" | "new" | "used") || "unused",
     price: equipment?.price || 0,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onSave({ ...formData }); // Send the updated form data to the parent component
   };
 
   return (
@@ -75,7 +75,7 @@ export const EquipmentForm = ({ equipment, onSave, onCancel }: EquipmentFormProp
               <Label htmlFor="status">Condition</Label>
               <Select 
                 value={formData.status} 
-                onValueChange={(value: "unused" | "used" | "partial") => 
+                onValueChange={(value: "unused" | "new" | "used") => 
                   setFormData(prev => ({ ...prev, status: value }))
                 }
               >
