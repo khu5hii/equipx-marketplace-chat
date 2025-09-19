@@ -73,3 +73,5 @@ export const EquipmentCard = ({
     </Card>
   );
 };
+
+export type { Equipment };

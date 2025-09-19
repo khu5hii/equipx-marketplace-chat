@@ -70,7 +70,10 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
   };
 
   const activeListings = equipment.filter(item => item.sellerId === user._id); // Fix filtering logic
-  const totalValue = activeListings.reduce((sum, item) => sum + item.price, 0);
+const totalValue = Array.isArray(activeListings)
+  ? activeListings.reduce((sum, item) => sum + (Number(item.price) || 0), 0)
+  : 0;
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -123,14 +126,14 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Value</p>
-                  <p className="text-3xl font-bold text-foreground">${totalValue.toLocaleString()}</p>
+                  <p className="text-3xl font-bold text-foreground">₹{totalValue.toLocaleString()}</p>
                 </div>
                 <Activity className="w-8 h-8 text-secondary" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="shadow-card">
+          {/* <Card className="shadow-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -140,7 +143,7 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
                 <CheckCircle className="w-8 h-8 text-secondary" />
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
         {/* Equipment Management */}
@@ -162,8 +165,8 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
             <Tabs defaultValue="active" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="active">Active ({activeListings.length})</TabsTrigger>
-                <TabsTrigger value="sold">Sold (3)</TabsTrigger>
-                <TabsTrigger value="archived">Archived (2)</TabsTrigger>
+                {/* <TabsTrigger value="sold">Sold (3)</TabsTrigger> */}
+                {/* <TabsTrigger value="archived">Archived (2)</TabsTrigger> */}
               </TabsList>
               
               <TabsContent value="active" className="mt-6">
@@ -207,19 +210,19 @@ export const SellerDashboard = ({ user, onLogout }: SellerDashboardProps) => {
                 )}
               </TabsContent>
               
-              <TabsContent value="sold" className="mt-6">
+              {/* <TabsContent value="sold" className="mt-6">
                 <div className="text-center py-12">
                   <CheckCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">Sold equipment history will appear here</p>
                 </div>
-              </TabsContent>
+              </TabsContent> */}
               
-              <TabsContent value="archived" className="mt-6">
+              {/* <TabsContent value="archived" className="mt-6">
                 <div className="text-center py-12">
                   <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">Archived listings will appear here</p>
                 </div>
-              </TabsContent>
+              </TabsContent> */}
             </Tabs>
           </CardContent>
         </Card>
