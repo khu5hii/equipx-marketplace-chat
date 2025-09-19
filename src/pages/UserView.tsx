@@ -4,17 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Filter, Activity, LogOut, Heart } from "lucide-react";
-import { EquipmentCard, Equipment } from "@/components/EquipmentCard";
+import { EquipmentCard } from "@/components/EquipmentCard";
 import { ChatWindow } from "@/components/ChatWindow";
+import { fetchProducts } from "@/services/product.service";
+import { Equipment, User } from "@/models/models";
 import bloodPressureImg from "@/assets/blood-pressure-monitor.jpg";
 import pulseOximeterImg from "@/assets/pulse-oximeter.jpg";
 import stethoscopeImg from "@/assets/stethoscope.jpg";
-
-interface User {
-  name: string;
-  email: string;
-  role: "seller" | "buyer";
-}
+import { useNavigate } from "react-router-dom";
 
 interface UserViewProps {
   user: User;
@@ -24,7 +21,7 @@ interface UserViewProps {
 // Mock data for demo - expanded marketplace with generated images
 const allEquipment: Equipment[] = [
   {
-    id: "1",
+    _id: "1",
     name: "Digital Blood Pressure Monitor",
     image: bloodPressureImg,
     status: "unused",
@@ -33,7 +30,7 @@ const allEquipment: Equipment[] = [
     sellerId: "seller1",
   },
   {
-    id: "2", 
+    _id: "2", 
     name: "Pulse Oximeter",
     image: pulseOximeterImg,
     status: "used",
@@ -42,7 +39,7 @@ const allEquipment: Equipment[] = [
     sellerId: "seller1",
   },
   {
-    id: "3",
+    _id: "3",
     name: "Stethoscope - Cardiology Grade",
     image: stethoscopeImg,
     status: "unused",
@@ -51,16 +48,16 @@ const allEquipment: Equipment[] = [
     sellerId: "seller2",
   },
   {
-    id: "4",
+    _id: "4",
     name: "Digital Thermometer Set",
     image: bloodPressureImg,
-    status: "partial",
+    status: "unused",
     price: 45,
     seller: "City Medical Center",
     sellerId: "seller3",
   },
   {
-    id: "5",
+    _id: "5",
     name: "Wheelchair - Manual",
     image: stethoscopeImg,
     status: "used",
@@ -69,7 +66,7 @@ const allEquipment: Equipment[] = [
     sellerId: "seller4",
   },
   {
-    id: "6",
+    _id: "6",
     name: "Nebulizer Machine",
     image: pulseOximeterImg,
     status: "unused",
@@ -80,12 +77,27 @@ const allEquipment: Equipment[] = [
 ];
 
 export const UserView = ({ user, onLogout }: UserViewProps) => {
-  const [equipment] = useState<Equipment[]>(allEquipment);
-  const [filteredEquipment, setFilteredEquipment] = useState<Equipment[]>(allEquipment);
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [filteredEquipment, setFilteredEquipment] = useState<Equipment[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priceSort, setPriceSort] = useState<string>("none");
   const [chatEquipment, setChatEquipment] = useState<Equipment | null>(null);
+  const navigate = useNavigate();
+
+  // Fetch equipment data
+  useEffect(() => {
+    const loadEquipment = async () => {
+      try {
+        const products = await fetchProducts();
+        setEquipment(products);
+        setFilteredEquipment(products);
+      } catch (error) {
+        console.error("Failed to fetch equipment:", error);
+      }
+    };
+    loadEquipment();
+  }, []);
 
   // Apply filters
   const applyFilters = () => {
@@ -138,6 +150,11 @@ export const UserView = ({ user, onLogout }: UserViewProps) => {
     setChatEquipment(equipment);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Clear the token
+    navigate("/login", { replace: true }); // Redirect to login page
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -158,7 +175,7 @@ export const UserView = ({ user, onLogout }: UserViewProps) => {
               </div>
               <Button 
                 variant="outline" 
-                onClick={onLogout}
+                onClick={handleLogout}
                 className="transition-smooth hover:bg-accent"
               >
                 <LogOut className="w-4 h-4 mr-2" />
@@ -246,7 +263,7 @@ export const UserView = ({ user, onLogout }: UserViewProps) => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEquipment.map((item) => (
                   <EquipmentCard
-                    key={item.id}
+                    key={item._id}
                     equipment={item}
                     showActions="buyer"
                     onContact={handleContactSeller}

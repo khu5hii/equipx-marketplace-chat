@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Activity, Heart, Users, Recycle } from "lucide-react";
+import { registerUser, loginUser } from "@/services/auth.service";
 
 interface LandingProps {
   onLogin: (user: { name: string; email: string; role: "seller" | "buyer" }) => void;
@@ -18,14 +19,28 @@ export const Landing = ({ onLogin }: LandingProps) => {
     password: "",
     role: "buyer" as "seller" | "buyer",
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin({
-      name: formData.name || (isLogin ? "Demo User" : formData.name),
-      email: formData.email,
-      role: formData.role,
-    });
+    setLoading(true);
+
+    try {
+        if (isLogin) {
+            const user = await loginUser({ email: formData.email, password: formData.password, role: formData.role });
+            localStorage.setItem('token', user.token); // Save token to localStorage
+            onLogin(user);
+        } else {
+            const user = await registerUser(formData);
+            localStorage.setItem('token', user.token); // Save token to localStorage
+            onLogin(user);
+        }
+    } catch (error) {
+      console.error("Authentication error:", error);
+      alert("Authentication failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -173,8 +188,9 @@ export const Landing = ({ onLogin }: LandingProps) => {
                 <Button 
                   type="submit"
                   className="w-full gradient-medical shadow-button transition-bounce hover:scale-105"
+                  disabled={loading}
                 >
-                  {isLogin ? "Sign In" : "Create Account"}
+                  {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
                 </Button>
               </form>
             </CardContent>
